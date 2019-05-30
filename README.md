@@ -6,7 +6,7 @@ Sound Pad
 
 - 🎮 Change the text and pad settings
     * [Open configuration](#~/.koji/customization/settings.json!visual)
-- 🖼️ Replace the frog, enemies, background and more
+- 🖼️ Replace the pad and background images
     * [Open configuration](#~/.koji/customization/images.json!visual)
 - 🔈 Change the sounds for winning, losing, and more
     * [Open configuration](#~/.koji/customization/sounds.json!visual)
