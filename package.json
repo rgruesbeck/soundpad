@@ -1,0 +1,21 @@
+{
+  "name": "soundpad",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "prestart": "koji-tools watch &",
+    "start": "npm run dev",
+    "dev": "npx parcel index.html",
+    "build": "npx parcel build index.html",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postbuild": "koji-tools pwa"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "koji-tools": "^0.5.0",
+    "parcel-bundler": "^1.12.3",
+    "webfontloader": "^1.6.28"
+  }
+}
