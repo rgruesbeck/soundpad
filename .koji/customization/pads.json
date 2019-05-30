@@ -1,0 +1,28 @@
+{
+    "pads": {
+      "padOneSound": "https://s3-us-west-2.amazonaws.com/koji-cdn/media/ron/game-music.mp3",
+      "padOneImage": "https://s3-us-west-2.amazonaws.com/koji-cdn/media/ron/game-music.mp3"
+    },
+    "@@editor": [
+      {
+        "key": "pads",
+        "name": "Pads",
+        "icon": "🔊️",
+        "source": "pads.json",
+        "fields": [
+          {
+            "key": "padOneSound",
+            "name": "Pad Sound",
+            "description": "Sound for Pad One",
+            "type": "sound"
+          },
+          {
+            "key": "padOneImage",
+            "name": "Pad Image",
+            "description": "Image for Pad One",
+            "type": "image"
+          }
+        ]
+      }
+    ]
+  }
