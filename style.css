@@ -1,9 +1,26 @@
+<!-- https://coolors.co/bce7fd-c492b1-af3b6e-424651-21fa90 -->
+
 * {
     padding: 0;
     margin: 0;
 }
 
 body {
-    width: 100%;
-    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+#app {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 100vw;
+    height: 100vh;
+}
+
+.pad {
+    background-position: center;
+    background-size: cover;
+    border-radius: 1em;
+    margin: auto;
 }
