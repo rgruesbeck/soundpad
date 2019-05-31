@@ -6,10 +6,8 @@ Sound Pad
 
 - 🎮 Change the text and pad settings
     * [Open configuration](#~/.koji/customization/settings.json!visual)
-- 🖼️ Replace the pad and background images
-    * [Open configuration](#~/.koji/customization/images.json!visual)
-- 🔈 Change the sounds for winning, losing, and more
-    * [Open configuration](#~/.koji/customization/sounds.json!visual)
+- 🎛️ Add or modify pad sounds and images
+    * [Open configuration](#~/.koji/customization/pad.json!visual)
 - 💅 Change the colors and visual style
     * [Open configuration](#~/.koji/customization/colors.json!visual)
 - ⚙️ Add your Google Analytics ID and Open Graph information for sharing

@@ -1,7 +1,6 @@
 {
   "colors": {
-    "textColor": "#6f565c",
-    "primaryColor": "#424651",
+    "padColor": "#424651",
     "backgroundColor": "#93A3BC"
   },
   "@@editor": [
@@ -12,19 +11,15 @@
       "source": "colors.json",
       "fields": [
         {
-          "key": "textColor",
-          "name": "Text color",
-          "description": "Default color for text",
-          "type": "color"
-        },
-        {
-          "key": "primaryColor",
-          "name": "Primary Color",
+          "key": "padColor",
+          "name": "Pad Color",
+          "description": "Pad Color",
           "type": "color"
         },
         {
           "key": "backgroundColor",
           "name": "Background color",
+          "description": "Background Color",
           "type": "color"
         }
       ]

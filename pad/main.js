@@ -23,7 +23,16 @@ class SoundPad {
         this.pads = {};
 
         // event listeners
+
+        // pad hits
         document.addEventListener('click', ({ target }) => this.handleHit(target));
+        document.addEventListener('touchstart', ({ target }) => this.handleHit(target), { passive: true });
+
+        // orientation change
+        window.addEventListener("orientationchange", () => this.render());
+
+        // resize
+        window.addEventListener("resize", () => this.render());
 
         // handle koji config changes
         Koji.on('change', (scope, key, value) => {
@@ -84,10 +93,6 @@ class SoundPad {
     create(sounds) {
         // create pads
         this.pads = Object.entries(sounds).map((ent, idx, arr) => {
-            // pad size
-            let totalPads = arr.length;
-            let padSize = Math.min(this.root.clientWidth / totalPads, this.root.clientWidth / totalPads);
-
             // pad id
             let id = Math.random().toString(16).slice(2);
 
@@ -101,9 +106,7 @@ class SoundPad {
             node.id = id;
             node.className = 'pad';
             node.style.backgroundImage = `url("${imageSrc}")`;
-            node.style.width = `${padSize}px`;
-            node.style.height = `${padSize}px`;
-            node.style.backgroundColor = this.config.colors.primaryColor;
+            node.style.backgroundColor = this.config.colors.padColor;
 
             return {
                 id: id,
@@ -122,6 +125,13 @@ class SoundPad {
     }
 
     render() {
+        // reset pads
+        this.padLength = 0;
+
+
+        // reset screen direction
+        this.setScreenDirection();
+
         // clear app
         while (this.root.firstChild) {
             this.root.removeChild(this.root.firstChild);
@@ -132,11 +142,66 @@ class SoundPad {
 
         Object.entries(this.pads)
         .map(ent => ent[1])
+        .filter((pad, idx) => { return idx < 9; })
+        .map((pad, idx, arr) => {
+            // restyle pad
+            if (idx === 0) {
+                let totalPads = Math.max(arr.length, 0);
+                let padSize = Math.max(
+                    this.root.clientWidth / totalPads,
+                    this.root.clientHeight / totalPads);
+
+                // set state
+                this.padSize = Math.floor(padSize);
+            }
+
+            pad.node.style.width = `${this.padSize}px`;
+            pad.node.style.height = `${this.padSize}px`;
+
+            return pad
+        })
         .forEach((pad) => {
+
+            this.padLength += 1;
             board.appendChild(pad.node);
         })
 
         this.root.appendChild(board);
+    }
+
+    setScreenDirection(depth = 0) {
+        // re-orient for 120 frames
+        if (depth && depth > 120) { return; }
+
+        let style = this.getGridStyle();
+        this.root.style.gridTemplateColumns = style;
+
+        window.requestAnimationFrame(() => this.setScreenDirection(depth + 1));
+    }
+
+    getGridStyle() {
+        // this grid style gives us a grid that strikes a balance between
+        // being a square grid of items, and being longer for super wide screens
+        // while maximizing pad size
+
+        let width = this.root.clientWidth;
+        let height = this.root.clientHeight;
+        let ratio = Math.floor(width / height);
+
+        // centered items when less than 3 items on horizontal screen
+        if (ratio > 1 && this.padLength < 3) {
+
+            let cols = this.padLength;
+            return `repeat(${cols}, ${width/cols}px)`;
+
+        } else {
+        // all other cases
+
+            let square = Math.floor(Math.sqrt(this.padLength));
+            let cols = ratio + square;
+            return `repeat(${cols}, ${width/cols}px)`;
+        }
+
     }
 
     handleHit(target) {

@@ -1,9 +1,23 @@
 {
     "pads": {
-      "padOneSound": "https://objects.koji-cdn.com/421c16c3-f67f-4636-aab2-84b65741064a/whoosh3mp3",
-      "padOneImage": "https://i.imgur.com/SEuQ1fL.png",
-      "padTwoSound": "https://objects.koji-cdn.com/421c16c3-f67f-4636-aab2-84b65741064a/whoosh3mp3",
-      "padTwoImage": "https://i.imgur.com/zxUDImz.png"
+      "pad1Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad1Image": "https://i.imgur.com/TUxXvV0.png",
+      "pad2Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad2Image": "https://i.imgur.com/5EPfXkj.png",
+      "pad3Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad3Image": "https://i.imgur.com/edwC86R.png",
+      "pad4Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad4Image": "https://i.imgur.com/iAceVQ6.png",
+      "pad5Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad5Image": "https://i.imgur.com/upt6oaS.png",
+      "pad6Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad6Image": "https://i.imgur.com/NnvPGT3.png",
+      "pad7Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad7Image": "https://i.imgur.com/3WRgrE1.png",
+      "pad8Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad8Image": "https://i.imgur.com/yx6Q7M1.png",
+      "pad9Sound": "https://objects.koji-cdn.com/509732fa-8e49-42dc-bdaa-5bba44ff75ca/coin.mp3",
+      "pad9Image": "https://i.imgur.com/MoZdmqm.png"
     },
     "@@editor": [
       {
@@ -13,27 +27,111 @@
         "source": "pads.json",
         "fields": [
           {
-            "key": "padOneSound",
-            "name": "Pad One Sound",
-            "description": "Sound for Pad One",
+            "key": "pad1Sound",
+            "name": "Pad 1 Sound",
+            "description": "Sound for Pad 1",
             "type": "sound"
           },
           {
-            "key": "padOneImage",
-            "name": "Pad One Image",
-            "description": "Image for Pad One",
+            "key": "pad1Image",
+            "name": "Pad 1 Image",
+            "description": "Image for Pad 1",
             "type": "image"
           },
           {
-            "key": "padTwoSound",
-            "name": "Pad Two Sound",
-            "description": "Sound for Pad Two",
+            "key": "pad2Sound",
+            "name": "Pad 2 Sound",
+            "description": "Sound for Pad 2",
             "type": "sound"
           },
           {
-            "key": "padTwoImage",
-            "name": "Pad Two Image",
-            "description": "Image for Pad Two",
+            "key": "pad2Image",
+            "name": "Pad 2 Image",
+            "description": "Image for Pad 2",
+            "type": "image"
+          },
+          {
+            "key": "pad3Sound",
+            "name": "Pad 3 Sound",
+            "description": "Sound for Pad 3",
+            "type": "sound"
+          },
+          {
+            "key": "pad3Image",
+            "name": "Pad 3 Image",
+            "description": "Image for Pad 3",
+            "type": "image"
+          },
+          {
+            "key": "pad4Sound",
+            "name": "Pad 4 Sound",
+            "description": "Sound for Pad 4",
+            "type": "sound"
+          },
+          {
+            "key": "pad4Image",
+            "name": "Pad 4 Image",
+            "description": "Image for Pad 4",
+            "type": "image"
+          },
+          {
+            "key": "pad5Sound",
+            "name": "Pad 5 Sound",
+            "description": "Sound for Pad 5",
+            "type": "sound"
+          },
+          {
+            "key": "pad5Image",
+            "name": "Pad 5 Image",
+            "description": "Image for Pad 5",
+            "type": "image"
+          },
+          {
+            "key": "pad6Sound",
+            "name": "Pad 6 Sound",
+            "description": "Sound for Pad 6",
+            "type": "sound"
+          },
+          {
+            "key": "pad6Image",
+            "name": "Pad 6 Image",
+            "description": "Image for Pad 6",
+            "type": "image"
+          },
+          {
+            "key": "pad7Sound",
+            "name": "Pad 7 Sound",
+            "description": "Sound for Pad 7",
+            "type": "sound"
+          },
+          {
+            "key": "pad7Image",
+            "name": "Pad 7 Image",
+            "description": "Image for Pad 7",
+            "type": "image"
+          },
+          {
+            "key": "pad8Sound",
+            "name": "Pad 8 Sound",
+            "description": "Sound for Pad 8",
+            "type": "sound"
+          },
+          {
+            "key": "pad8Image",
+            "name": "Pad 8 Image",
+            "description": "Image for Pad 8",
+            "type": "image"
+          },
+          {
+            "key": "pad9Sound",
+            "name": "Pad 9 Sound",
+            "description": "Sound for Pad 9",
+            "type": "sound"
+          },
+          {
+            "key": "pad9Image",
+            "name": "Pad 9 Image",
+            "description": "Image for Pad 9",
             "type": "image"
           }
         ]
