@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "title": "HTML5 Canvas Game Scaffold",
-    "description": "A scaffold for creating games with HTML5 Canvas on Koji. Easily customizable at gokoji.com.",
-    "image": "https://images.koji-cdn.com/template-assets/727131f6-5eb2-4965-a7ae-fab193c57ff1_1556937543249.png",
-    "icon": "https://images.koji-cdn.com/template-assets/727131f6-5eb2-4965-a7ae-fab193c57ff1_1556937543249.png",
-    "icon192": "https://images.koji-cdn.com/template-assets/727131f6-5eb2-4965-a7ae-fab193c57ff1_1556937543249.png?&w=192&h=192",
-    "icon512": "https://images.koji-cdn.com/template-assets/727131f6-5eb2-4965-a7ae-fab193c57ff1_1556937543249.png?&w=512&h=512",
+    "title": "Sound Pad",
+    "description": "A Sound Pad. Easily customizable at gokoji.com.",
+    "image": "https://images.koji-cdn.com/template-assets/6e735402-321d-436a-9bcd-617b14624cae_1559338155908.png",
+    "icon": "https://images.koji-cdn.com/template-assets/6e735402-321d-436a-9bcd-617b14624cae_1559338155908.png",
+    "icon192": "",
+    "icon512": "",
     "gaCode": ""
   },
   "@@editor": [
