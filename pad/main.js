@@ -167,6 +167,7 @@ class SoundPad {
             node.className = 'pad';
             node.style.backgroundImage = `url("${imageSrc}")`;
             node.style.backgroundColor = this.config.colors.padColor;
+            node.style.borderColor = this.config.colors.padSideColor;
 
             return {
                 id: id,
@@ -230,7 +231,22 @@ class SoundPad {
 
        let result = Math.min(maxWidth, maxHeight);
 
-       return result;
+       return result - (result / 8);
+    }
+
+    getPadSpace(total) {
+        let { app, pads } = this.nodes;
+        let width = app.clientWidth;
+        let height = pads.offsetHeight;
+
+        let padSize = this.getPadSize(total);
+        let cols = this.getColCount(total);
+        let rows = Math.ceil(total / cols);
+
+        let xSpace = (width - (padSize * cols)) / cols;
+        let ySpace = (height - (padSize * rows)) / rows;
+
+        return Math.min(xSpace, ySpace);
     }
 
     getColCount(total) {
@@ -253,8 +269,12 @@ class SoundPad {
         // calculate and set height of pads area
         let cols = this.getColCount(this.padLength);
         let padSize = this.getPadSize(this.padLength);
+        let padSpace = this.getPadSpace(this.padLength);
 
-        return `repeat(${cols}, ${padSize}px)`;
+        return {
+            columns: `repeat(${cols}, ${padSize}px)`,
+            space: `${padSpace}px`
+        };
     }
 
     setScreenDirection(depth = 0) {
@@ -263,16 +283,23 @@ class SoundPad {
 
         let { pads } = this.nodes;
         let style = this.getGridStyle();
-        pads.style.gridTemplateColumns = style;
+
+        pads.style.gridTemplateColumns = style.columns;
+        pads.style.gridGap = style.space;
 
         window.requestAnimationFrame(() => this.setScreenDirection(depth + 1));
     }
 
     handleHit(target) {
 
-        // play sound
+        // hit pad
         let pad = this.pads[target.id];
-        if ( pad ) { return this.playSound(pad); }
+        if ( pad ) {
+            // vibrate 200ms
+            window.navigator.vibrate && window.navigator.vibrate(200);
+
+            return this.playSound(pad);
+        }
 
         // play/pause background track
         if ( target.id === 'play' ) {
@@ -318,13 +345,11 @@ class SoundPad {
         if (this.state.trackLooping) {
             backgroundTrack.loop = false;
             loopControl.textContent = 'repeat_one';
-            console.log('flase-loop', loopControl);
 
             this.state.trackLooping = false;
         } else {
             backgroundTrack.loop = true;
             loopControl.textContent = 'repeat';
-            console.log('true-loop', loopControl);
 
             this.state.trackLooping = true;
         }

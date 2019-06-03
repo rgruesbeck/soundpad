@@ -53,7 +53,7 @@ body {
 #pads {
     flex: 1 1 auto;
     display: grid;
-    grid-gap: 1px;
+    grid-gap: 0px;
     align-items: center;
     justify-items: center;
     margin: auto;
@@ -64,6 +64,15 @@ body {
     background-size: cover;
     border-radius: 1em;
     margin: auto;
+    border-bottom: 5px solid black;
+    border-right: 5px solid black;
+    transition: transform 0.1s ease-out, border 0.1s ease-out;
+}
+
+.pad:active {
+    transform: translate(2px, 2px);
+    border-bottom: 3px solid black;
+    border-right: 3px solid black;
 }
 
 #overlay {

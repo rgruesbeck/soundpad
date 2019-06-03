@@ -4,6 +4,7 @@
     "primaryColor": "#424651",
     "buttonColor": "#55acee",
     "padColor": "#424651",
+    "padSideColor": "#338abb",
     "backgroundColor": "#93A3BC"
   },
   "@@editor": [
