@@ -1,5 +1,8 @@
 {
   "colors": {
+    "textColor": "#ccd6dd",
+    "primaryColor": "#424651",
+    "buttonColor": "#55acee",
     "padColor": "#424651",
     "backgroundColor": "#93A3BC"
   },

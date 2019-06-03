@@ -1,6 +1,6 @@
 {
     "sounds": {
-      "backgroundMusic": "https://s3-us-west-2.amazonaws.com/koji-cdn/media/ron/game-music.mp3"
+      "backgroundTrack": "https://objects.koji-cdn.com/9b2a9ca8-991f-466c-8abb-228a9c23350a/TetrisSalsamp3"
     },
     "@@editor": [
       {
@@ -10,9 +10,9 @@
         "source": "sounds.json",
         "fields": [
           {
-            "key": "backgroundMusic",
-            "name": "Background Music",
-            "description": "Music to loop in background",
+            "key": "backgroundTrack",
+            "name": "Background Track",
+            "description": "Background Track",
             "type": "sound"
           }
         ]

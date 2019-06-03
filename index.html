@@ -13,7 +13,31 @@
 </head>
 
 <body style="touch-action: none; overflow: hidden; overscroll-behavior-y: contain; position: fixed">
-  <div id="app"></div>
+  <div id="loading" class="la-ball-clip-rotate">
+      <div></div>
+  </div>
+  <div id="app">
+    <!-- top bar for tack controls -->
+    <div id="bar">
+      <div id="nameBanner"></div>
+      <div id="control">
+          <i id="play" class="material-icons">play_arrow</i>
+          <i id="loop" class="material-icons">repeat_one</i>
+      </div>
+    </div>
+    <!-- pads for holding pads-->
+    <div id="pads"></div>
+    <!-- overlay for instructions menu-->
+    <div id="overlay">
+      <div class="container">
+        <div id="menu">
+          <div id="name">Sound Pad</div>
+          <div id="instructions"></div>
+          <div id="button">Play</div>
+        </div>
+      </div>
+    </div>
+  </div>
   <script src="./index.js"></script>
   <script src="./mobilebundle.js">
     // fixes for mobile devices 

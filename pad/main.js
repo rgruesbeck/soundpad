@@ -11,11 +11,31 @@ import {
 
 class SoundPad {
     constructor(root, config) {
-        this.root = root;
+        this.app = root;
         this.config = config;
         this.name = this.config.settings.name;
 
-        this.background = document.body;
+        this.nodes = {
+            app: root,
+            background: document.body,
+            loading: document.getElementById('loading'),
+            name: document.getElementById('nameBanner'),
+            pads: document.getElementById('pads'),
+            bar: document.getElementById('bar'),
+            control: document.getElementById('control'),
+            playControl: document.getElementById('play'),
+            loopControl: document.getElementById('loop'),
+            overlay: document.getElementById('overlay'),
+            menu: document.getElementById('menu'),
+            button: document.getElementById('button'),
+            instructions: document.getElementById('instructions')
+        };
+
+        this.state = {
+            trackPlaying: false,
+            trackLooped: false
+        };
+
 
         this.images = {};
         this.sounds = {};
@@ -23,6 +43,9 @@ class SoundPad {
         this.pads = {};
 
         // event listeners
+
+        // clear menu
+        this.nodes.button.addEventListener('click', () => this.clearMenu());
 
         // pad hits
         document.addEventListener('click', ({ target }) => this.handleHit(target));
@@ -42,8 +65,26 @@ class SoundPad {
     }
 
     load() {
-        // set colors
-        this.background.style.backgroundColor = this.config.colors.backgroundColor;
+        // set mobile flag
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+
+        // set colors, button text, and instructions
+        this.nodes.background.style.backgroundColor = this.config.colors.backgroundColor;
+
+        this.nodes.loading.style.color = this.config.colors.textColor;
+        this.nodes.name.textContent = this.config.settings.name;
+        this.nodes.name.style.color = this.config.colors.textColor;
+
+        this.nodes.menu.style.color = this.config.colors.textColor;
+        this.nodes.menu.style.backgroundColor = this.config.colors.primaryColor;
+
+        this.nodes.button.style.backgroundColor = this.config.colors.buttonColor;
+
+        this.nodes.instructions.innerHTML = this.isMobile ? 
+        this.config.settings.instructionsMobile :
+        this.config.settings.instructionsDesktop;
+
+        this.nodes.control.style.color = this.config.colors.textColor;
 
         // collect valid pads
         const pads = this.config['@@editor']
@@ -68,22 +109,31 @@ class SoundPad {
                 return loadSound(asset.key, asset.value)
             }
 
-            // font loader
-            if (asset.type === 'font') {
-                return loadFont(asset.key, asset.value)
-            }
-
             return null;
         }).filter(asset => asset);
 
 
 
         // load assets
-        loadList(assets)
+        loadList([
+            ...assets,
+            loadSound('backgroundTrack', this.config.sounds.backgroundTrack),
+            loadFont('mainFont', this.config.settings.fontFamily)
+        ])
         .then((loadedAssets) => {
 
             this.images = loadedAssets.image;
             this.sounds = loadedAssets.sound;
+            this.fonts = loadedAssets.font;
+
+            // attach onended handler for background track
+            if (this.sounds.backgroundTrack) {
+                this.sounds.backgroundTrack.onended = () => {
+                    if (!this.state.trackLooped) {
+                        this.nodes.playControl.textContent = 'play_arrow';
+                    }
+                };
+            }
 
             this.create(this.sounds);
         })
@@ -91,8 +141,18 @@ class SoundPad {
     }
 
     create(sounds) {
+        // set menu font
+        this.app.style.fontFamily = this.fonts.mainFont;
+
+        let { app, loading } = this.nodes;
+        // hide loading & show app
+        loading.style.opacity = 0;
+        app.style.opacity = 1;
+
         // create pads
-        this.pads = Object.entries(sounds).map((ent, idx, arr) => {
+        this.pads = Object.entries(sounds)
+        .filter(ent => ent[0] != 'backgroundTrack') // ignore background track
+        .map((ent, idx, arr) => {
             // pad id
             let id = Math.random().toString(16).slice(2);
 
@@ -133,8 +193,9 @@ class SoundPad {
         this.setScreenDirection();
 
         // clear app
-        while (this.root.firstChild) {
-            this.root.removeChild(this.root.firstChild);
+        let { pads } = this.nodes;
+        while (pads.firstChild) {
+            pads.removeChild(pads.firstChild);
         }
 
         // render new state
@@ -142,41 +203,46 @@ class SoundPad {
 
         Object.entries(this.pads)
         .map(ent => ent[1])
-        .filter((pad, idx) => { return idx < 9; })
-        .map((pad, idx, arr) => {
-            // restyle pad
-            if (idx === 0) {
-                let totalPads = Math.max(arr.length, 0);
-                let padSize = Math.max(
-                    this.root.clientWidth / totalPads,
-                    this.root.clientHeight / totalPads);
+        .forEach((pad, idx, arr) => {
 
-                // set state
-                this.padSize = Math.floor(padSize);
-            }
+            let padSize = this.getPadSize(arr.length);
+            pad.node.style.width = `${padSize}px`;
+            pad.node.style.height = `${padSize}px`;
 
-            pad.node.style.width = `${this.padSize}px`;
-            pad.node.style.height = `${this.padSize}px`;
-
-            return pad
-        })
-        .forEach((pad) => {
+            board.appendChild(pad.node);
 
             this.padLength += 1;
-            board.appendChild(pad.node);
         })
 
-        this.root.appendChild(board);
+        pads.appendChild(board);
     }
 
-    setScreenDirection(depth = 0) {
-        // re-orient for 120 frames
-        if (depth && depth > 120) { return; }
+    getPadSize(total) {
+       let { app, bar } = this.nodes;
+       let padsHeight = app.offsetHeight - bar.offsetHeight;
+       let padsWidth = this.app.clientWidth;
+       let cols = this.getColCount(total)
 
-        let style = this.getGridStyle();
-        this.root.style.gridTemplateColumns = style;
+       let maxWidth = padsWidth / cols;
+       let maxHeight = total % cols === 0 ?
+           padsHeight / (total / cols) :
+           padsHeight / ((total / cols) + 1);
 
-        window.requestAnimationFrame(() => this.setScreenDirection(depth + 1));
+       let result = Math.min(maxWidth, maxHeight);
+
+       return result;
+    }
+
+    getColCount(total) {
+        let { app, bar } = this.nodes;
+        let padsHeight = app.offsetHeight - bar.offsetHeight;
+
+        let width = app.clientWidth;
+        let height = padsHeight;
+        let ratio = Math.floor(width / height);
+
+        let square = Math.floor(Math.sqrt(total));
+        return square + ratio;
     }
 
     getGridStyle() {
@@ -184,30 +250,39 @@ class SoundPad {
         // being a square grid of items, and being longer for super wide screens
         // while maximizing pad size
 
-        let width = this.root.clientWidth;
-        let height = this.root.clientHeight;
-        let ratio = Math.floor(width / height);
+        // calculate and set height of pads area
+        let cols = this.getColCount(this.padLength);
+        let padSize = this.getPadSize(this.padLength);
 
-        // centered items when less than 3 items on horizontal screen
-        if (ratio > 1 && this.padLength < 3) {
+        return `repeat(${cols}, ${padSize}px)`;
+    }
 
-            let cols = this.padLength;
-            return `repeat(${cols}, ${width/cols}px)`;
+    setScreenDirection(depth = 0) {
+        // re-orient for 120 frames
+        if (depth && depth > 120) { return; }
 
-        } else {
-        // all other cases
+        let { pads } = this.nodes;
+        let style = this.getGridStyle();
+        pads.style.gridTemplateColumns = style;
 
-            let square = Math.floor(Math.sqrt(this.padLength));
-            let cols = ratio + square;
-            return `repeat(${cols}, ${width/cols}px)`;
-        }
-
+        window.requestAnimationFrame(() => this.setScreenDirection(depth + 1));
     }
 
     handleHit(target) {
 
+        // play sound
         let pad = this.pads[target.id];
-        if (pad) { this.playSound(pad); }
+        if ( pad ) { return this.playSound(pad); }
+
+        // play/pause background track
+        if ( target.id === 'play' ) {
+            this.playTrack();
+        }
+
+        // toggle loop: background track
+        if ( target.id === 'loop' ) {
+            this.loopTrack();
+        }
     }
 
     playSound(pad) {
@@ -215,6 +290,58 @@ class SoundPad {
         let sound = this.sounds[pad.sound];
         sound.currentTime = 0;
         sound.play();
+    }
+
+    playTrack() {
+
+        let { backgroundTrack } = this.sounds;
+        let { playControl } = this.nodes;
+
+        if (this.state.trackPlaying) {
+            backgroundTrack.pause();
+            playControl.textContent = 'play_arrow';
+
+            this.state.trackPlaying = false;
+        } else {
+            backgroundTrack.play();
+            playControl.textContent = 'pause';
+
+            this.state.trackPlaying = true;
+        }
+
+    }
+
+    loopTrack() {
+        let { backgroundTrack } = this.sounds;
+        let { loopControl } = this.nodes;
+
+        if (this.state.trackLooping) {
+            backgroundTrack.loop = false;
+            loopControl.textContent = 'repeat_one';
+            console.log('flase-loop', loopControl);
+
+            this.state.trackLooping = false;
+        } else {
+            backgroundTrack.loop = true;
+            loopControl.textContent = 'repeat';
+            console.log('true-loop', loopControl);
+
+            this.state.trackLooping = true;
+        }
+
+    }
+
+    clearMenu() {
+        let { overlay, menu } = this.nodes;
+
+        // fade menu out
+        menu.style.opacity = 0;
+
+        // set overlay back
+        setTimeout(() => {
+            menu.style.display = 'none';
+            overlay.style.zIndex = -1;
+        }, 1000);
     }
 }
 
