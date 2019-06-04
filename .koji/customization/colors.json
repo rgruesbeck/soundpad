@@ -1,10 +1,10 @@
 {
   "colors": {
-    "textColor": "#ccd6dd",
+    "textColor": "#aad2ff",
     "primaryColor": "#424651",
-    "buttonColor": "#55acee",
-    "padColor": "#424651",
-    "padSideColor": "#338abb",
+    "buttonColor": "#785ae6",
+    "padColor": "#785ae6",
+    "padSideColor": "#fa8cb4",
     "backgroundColor": "#93A3BC"
   },
   "@@editor": [

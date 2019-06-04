@@ -192,7 +192,6 @@ class SoundPad {
             containerNode.id = id;
             containerNode.className = 'pad-container';
 
-            padNode.id = id;
             padNode.className = 'pad';
             padNode.style.backgroundImage = `url("${imageSrc}")`;
             padNode.style.backgroundColor = this.config.colors.padColor;

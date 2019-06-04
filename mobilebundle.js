@@ -19,3 +19,17 @@ function preventPullToRefresh(element) {
 };
 
 preventPullToRefresh('#app');
+
+// prevent ios doubletap zoom
+var lastTouchEnd = 0;
+function preventDoubleTapZoom(element) {
+    document.addEventListener('touchend', function (event) {
+    var now = (new Date()).getTime();
+    if (now - lastTouchEnd <= 500) {
+        event.preventDefault();
+    }
+    lastTouchEnd = now;
+    }, false);
+}
+
+preventDoubleTapZoom();
