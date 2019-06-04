@@ -44,12 +44,15 @@ class SoundPad {
 
         // event listeners
 
-        // clear menu
-        this.nodes.button.addEventListener('click', () => this.clearMenu());
-
-        // pad hits
-        document.addEventListener('click', ({ target }) => this.handleHit(target));
-        document.addEventListener('touchstart', ({ target }) => this.handleHit(target), { passive: true });
+        // handle clicks / touches
+        document.addEventListener('click', ({ target }) => this.handleClick(target));
+        document.addEventListener('touchstart', ({ target }) => {
+            // hacky way to play sounds, needed for ios
+            if (target.sound) {
+                target.sound.currentTime = 0;
+                target.sound.play();
+            }
+        })
 
         // orientation change
         window.addEventListener("orientationchange", () => this.render());
@@ -74,7 +77,6 @@ class SoundPad {
             window.innerHeight
         };
 
-        console.log('appsize', this.isMobile, this.appSize);
     }
 
     load() {
@@ -207,10 +209,6 @@ class SoundPad {
         // reset pads
         this.padLength = 0;
 
-
-        // reset screen direction
-        this.setScreenDirection();
-
         // clear app
         let { pads } = this.nodes;
         while (pads.firstChild) {
@@ -225,8 +223,13 @@ class SoundPad {
         .forEach((pad, idx, arr) => {
 
             let padSize = this.getPadSize(arr.length);
-            pad.node.style.width = `${padSize}px`;
-            pad.node.style.height = `${padSize}px`;
+            let padNode = pad.node.firstChild;
+
+            padNode.style.width = `${padSize}px`;
+            padNode.style.height = `${padSize}px`;
+            padNode.sound = this.sounds[pad.sound];
+            // attach sound node to pad node
+            // needed for ios audio
 
             board.appendChild(pad.node);
 
@@ -234,99 +237,22 @@ class SoundPad {
         })
 
         pads.appendChild(board);
-
-        let style = this.getGridStyle();
-
-        console.log(style);
-        pads.style.gridTemplateColumns = style.columns;
-        pads.style.gridGap = style.space;
     }
 
     getPadSize(total) {
        let { bar } = this.nodes;
        let padsHeight = this.appSize.height - bar.offsetHeight;
        let padsWidth = this.appSize.width;
-       let cols = this.getColCount(total)
 
-       let maxWidth = padsWidth / cols;
-       let maxHeight = total % cols === 0 ?
-           padsHeight / (total / cols) :
-           padsHeight / ((total / cols) + 1);
+       let padSize = padsWidth / (Math.sqrt(total) + 1);
 
-       let result = Math.min(maxWidth, maxHeight);
-
-       return result - (result / 8);
+       return padSize;
     }
 
-    getPadSpace(total) {
-        let { bar } = this.nodes;
-        let width = this.appSize.width;
-        let height = this.appSize.height - bar.offsetHeight;
-
-        let padSize = this.getPadSize(total);
-        let cols = this.getColCount(total);
-        let rows = Math.ceil(total / cols);
-
-        let xSpace = (width - (padSize * cols)) / cols;
-        let ySpace = (height - (padSize * rows)) / rows;
-
-        return Math.min(xSpace, ySpace);
-    }
-
-    getColCount(total) {
-        let { bar } = this.nodes;
-        let padsHeight = this.appSize.height - bar.offsetHeight;
-
-        let width = this.appSize.width;
-        let height = padsHeight;
-        let ratio = Math.floor(width / height);
-
-        let square = Math.floor(Math.sqrt(total));
-        //return square + ratio;
-        return square;
-    }
-
-    getGridStyle() {
-        // this grid style gives us a grid that strikes a balance between
-        // being a square grid of items, and being longer for super wide screens
-        // while maximizing pad size
-
-        // calculate and set height of pads area
-        let cols = this.getColCount(this.padLength);
-        let padSize = this.getPadSize(this.padLength);
-        let padSpace = this.getPadSpace(this.padLength);
-
-        return {
-            columns: `repeat(${cols}, ${padSize}px)`,
-            space: `${padSpace}px`
-        };
-    }
-
-    setScreenDirection(depth = 0) {
-        // re-orient for 120 frames
-        if (depth && depth > 120) { return; }
-
-        let { pads } = this.nodes;
-        let style = this.getGridStyle();
-
-        pads.style.gridTemplateColumns = style.columns;
-        pads.style.gridGap = style.space;
-
-        window.requestAnimationFrame(() => this.setScreenDirection(depth + 1));
-    }
-
-    handleHit(target) {
-
-        // hit pad
-        let pad = this.pads[target.id];
-        if ( pad ) {
-            // vibrate 200ms
-            let vibrate = window.navigator.vibrate(200);
-            let sound = this.sounds[pad.sound];
-            sound.currentTime = 0;
-            sound.play();
-
-            // return this.playSound(pad);
+    handleClick(target) {
+        // start
+        if (target.id === 'button') {
+            this.clearMenu();
         }
 
         // play/pause background track
@@ -338,13 +264,6 @@ class SoundPad {
         if ( target.id === 'loop' ) {
             this.loopTrack();
         }
-    }
-
-    playSound(pad) {
-
-        let sound = this.sounds[pad.sound];
-        sound.currentTime = 0;
-        sound.play();
     }
 
     playTrack() {
@@ -396,6 +315,7 @@ class SoundPad {
             overlay.style.zIndex = -1;
         }, 1000);
     }
+
 }
 
 export default SoundPad;

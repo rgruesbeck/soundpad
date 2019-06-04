@@ -1,8 +1,12 @@
 <!-- https://coolors.co/bce7fd-c492b1-af3b6e-424651-21fa90 -->
+html {
+    touch-action: manipulation;
+}
 
 * {
     padding: 0;
     margin: 0;
+    user-select: none;
 }
 
 body {
@@ -52,21 +56,23 @@ body {
 
 #pads {
     flex: 1 1 auto;
-    display: grid;
-    grid-gap: 0px;
-    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: left;
     justify-items: center;
-    margin: auto;
+}
+
+.pad-container {
+    flex: 1 0 auto;
+    padding-left: 2vw;
 }
 
 .pad {
     background-position: center;
     background-size: cover;
     border-radius: 1em;
-    margin: auto;
     border-bottom: 5px solid black;
     border-right: 5px solid black;
-    height: 100%;
     transition: transform 0.1s ease-out, border 0.1s ease-out;
 }
 
