@@ -28,10 +28,6 @@ This directory contains the main pad code.
 This directory contains helper code for loading assets.
 - [assetLoaders: pad/helpers/assetLoaders.js](#~/pad/helpers/assetLoaders.js) a collections of functions to help load image, sound, and font assets.
 
-### ~/pad/utils
-This directory contains utility code for common functions.
-- [baseUtils: pad/utils/baseUtils.js](#~/pad/utils/baseUtils.js) a collection of useful functions for making pads.
-
 ## Support
 ### Community
 If you need any help, you can ask the community by [making a post](https://gokoji.com/posts), or [joining the discord](https://discordapp.com/invite/eQuMJF6).
