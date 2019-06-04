@@ -62,11 +62,22 @@ class SoundPad {
            this.config[scope][key] = value;
            this.load();
         });
+
+        // set mobile flag
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
+
+        // get app size
+        this.appSize = {
+            width: window.innerWidth,
+            height: this.isMobile ?
+            window.innerHeight - 250:
+            window.innerHeight
+        };
+
+        console.log('appsize', this.isMobile, this.appSize);
     }
 
     load() {
-        // set mobile flag
-        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
         // set colors, button text, and instructions
         this.nodes.background.style.backgroundColor = this.config.colors.backgroundColor;
@@ -162,18 +173,25 @@ class SoundPad {
             let imageSrc = this.images[imageKey].src;
 
             // pad dom element
-            let node = document.createElement('div');
-            node.id = id;
-            node.className = 'pad';
-            node.style.backgroundImage = `url("${imageSrc}")`;
-            node.style.backgroundColor = this.config.colors.padColor;
-            node.style.borderColor = this.config.colors.padSideColor;
+            let containerNode = document.createElement('div');
+            let padNode = document.createElement('div');
+
+            containerNode.id = id;
+            containerNode.className = 'pad-container';
+
+            padNode.id = id;
+            padNode.className = 'pad';
+            padNode.style.backgroundImage = `url("${imageSrc}")`;
+            padNode.style.backgroundColor = this.config.colors.padColor;
+            padNode.style.borderColor = this.config.colors.padSideColor;
+
+            containerNode.appendChild(padNode);
 
             return {
                 id: id,
                 sound: soundKey,
                 image: imageKey,
-                node: node
+                node: containerNode
             }
         })
         .reduce((pads, pad) => {
@@ -216,12 +234,18 @@ class SoundPad {
         })
 
         pads.appendChild(board);
+
+        let style = this.getGridStyle();
+
+        console.log(style);
+        pads.style.gridTemplateColumns = style.columns;
+        pads.style.gridGap = style.space;
     }
 
     getPadSize(total) {
-       let { app, bar } = this.nodes;
-       let padsHeight = app.offsetHeight - bar.offsetHeight;
-       let padsWidth = this.app.clientWidth;
+       let { bar } = this.nodes;
+       let padsHeight = this.appSize.height - bar.offsetHeight;
+       let padsWidth = this.appSize.width;
        let cols = this.getColCount(total)
 
        let maxWidth = padsWidth / cols;
@@ -235,9 +259,9 @@ class SoundPad {
     }
 
     getPadSpace(total) {
-        let { app, pads } = this.nodes;
-        let width = app.clientWidth;
-        let height = pads.offsetHeight;
+        let { bar } = this.nodes;
+        let width = this.appSize.width;
+        let height = this.appSize.height - bar.offsetHeight;
 
         let padSize = this.getPadSize(total);
         let cols = this.getColCount(total);
@@ -250,15 +274,16 @@ class SoundPad {
     }
 
     getColCount(total) {
-        let { app, bar } = this.nodes;
-        let padsHeight = app.offsetHeight - bar.offsetHeight;
+        let { bar } = this.nodes;
+        let padsHeight = this.appSize.height - bar.offsetHeight;
 
-        let width = app.clientWidth;
+        let width = this.appSize.width;
         let height = padsHeight;
         let ratio = Math.floor(width / height);
 
         let square = Math.floor(Math.sqrt(total));
-        return square + ratio;
+        //return square + ratio;
+        return square;
     }
 
     getGridStyle() {
@@ -296,9 +321,12 @@ class SoundPad {
         let pad = this.pads[target.id];
         if ( pad ) {
             // vibrate 200ms
-            window.navigator.vibrate && window.navigator.vibrate(200);
+            let vibrate = window.navigator.vibrate(200);
+            let sound = this.sounds[pad.sound];
+            sound.currentTime = 0;
+            sound.play();
 
-            return this.playSound(pad);
+            // return this.playSound(pad);
         }
 
         // play/pause background track
