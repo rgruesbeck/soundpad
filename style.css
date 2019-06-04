@@ -1,4 +1,3 @@
-<!-- https://coolors.co/bce7fd-c492b1-af3b6e-424651-21fa90 -->
 html {
     touch-action: manipulation;
 }
@@ -19,6 +18,8 @@ body {
     flex-flow: column;
     width: 100vw;
     height: 100vh;
+    background-position: center;
+    background-size: cover;
     opacity: 0;
     transition: opacity 1s;
 }

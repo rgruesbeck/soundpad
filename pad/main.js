@@ -17,7 +17,6 @@ class SoundPad {
 
         this.nodes = {
             app: root,
-            background: document.body,
             loading: document.getElementById('loading'),
             name: document.getElementById('nameBanner'),
             pads: document.getElementById('pads'),
@@ -46,8 +45,15 @@ class SoundPad {
 
         // handle clicks / touches
         document.addEventListener('click', ({ target }) => this.handleClick(target));
+
+        // hacky way to play sounds, needed for ios
         document.addEventListener('touchstart', ({ target }) => {
-            // hacky way to play sounds, needed for ios
+            if (target.sound) {
+                target.sound.currentTime = 0;
+                target.sound.play();
+            }
+        })
+        document.addEventListener('mousedown', ({ target }) => {
             if (target.sound) {
                 target.sound.currentTime = 0;
                 target.sound.play();
@@ -82,7 +88,7 @@ class SoundPad {
     load() {
 
         // set colors, button text, and instructions
-        this.nodes.background.style.backgroundColor = this.config.colors.backgroundColor;
+        this.app.style.backgroundColor = this.config.colors.backgroundColor;
 
         this.nodes.loading.style.color = this.config.colors.textColor;
         this.nodes.name.textContent = this.config.settings.name;
@@ -131,6 +137,7 @@ class SoundPad {
         loadList([
             ...assets,
             loadSound('backgroundTrack', this.config.sounds.backgroundTrack),
+            loadImage('backgroundImage', this.config.images.backgroundImage),
             loadFont('mainFont', this.config.settings.fontFamily)
         ])
         .then((loadedAssets) => {
@@ -146,6 +153,10 @@ class SoundPad {
                         this.nodes.playControl.textContent = 'play_arrow';
                     }
                 };
+            }
+
+            if (this.images.backgroundImage) {
+                this.app.style.backgroundImage = `url('${this.images.backgroundImage.src}')`;
             }
 
             this.create(this.sounds);
