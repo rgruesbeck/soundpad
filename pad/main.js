@@ -8,7 +8,7 @@ import { audioContext } from './audioContext.js';
 import {
     loadList,
     loadImage,
-    loadSoundBuffer,
+    loadSound,
     loadFont
 } from './assetLoaders.js';
 
@@ -128,7 +128,7 @@ class SoundPad {
 
             // sound loader
             if (asset.type === 'sound') {
-                return loadSoundBuffer(asset.key, asset.value, this.audioCtx)
+                return loadSound(asset.key, asset.value)
             }
 
             return null;
@@ -139,7 +139,7 @@ class SoundPad {
         // load assets
         loadList([
             ...assets,
-            loadSoundBuffer('backgroundTrack', this.config.sounds.backgroundTrack, this.audioCtx),
+            loadSound('backgroundTrack', this.config.sounds.backgroundTrack),
             loadImage('backgroundImage', this.config.images.backgroundImage),
             loadFont('mainFont', this.config.settings.fontFamily)
         ])
@@ -227,13 +227,12 @@ class SoundPad {
         Object.entries(this.pads)
         .map(ent => ent[1])
         .forEach((pad) => {
+            // needed for ios audio
+            // attach sound node to pad node
+            pad.image.sound = this.sounds[pad.sound];
 
             // add image
             pad.node.appendChild(pad.image);
-
-            // needed for ios audio
-            // attach sound node to pad node
-            pad.node.sound = this.sounds[pad.sound];
 
             board.appendChild(pad.node);
         })
@@ -261,12 +260,12 @@ class SoundPad {
             this.loopTrack();
         }
 
+        /*
         let pad = this.pads[target.id];
         if (pad) {
             this.playPadSound(pad.sound);
         }
 
-        /*
         console.log({
             target,
             audioCtx: this.audioCtx,
@@ -320,10 +319,11 @@ class SoundPad {
         // create audio buffer
         let id = Math.random().toString(16).slice(2);
         let audioBuffer = this.sounds[key];
+        let end = playing ? 0 : audioBuffer.duration;
 
         let playback = audioPlay(audioBuffer, {
             start: 0,
-            end: playing ? 0 : audioBuffer.duration,
+            end: end,
             context: this.audioCtx,
             autoplay: false
         }, () => {
