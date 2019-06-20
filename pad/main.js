@@ -2,10 +2,13 @@
 
 import Koji from 'koji-tools';
 
+import audioPlay from 'audio-play';
+import { audioContext } from './audioContext.js';
+
 import {
     loadList,
     loadImage,
-    loadSound,
+    loadSoundBuffer,
     loadFont
 } from './assetLoaders.js';
 
@@ -15,6 +18,7 @@ class SoundPad {
         this.config = config;
         this.name = this.config.settings.name;
 
+        // get relevant dom nodes
         this.nodes = {
             app: root,
             loading: document.getElementById('loading'),
@@ -30,19 +34,22 @@ class SoundPad {
             instructions: document.getElementById('instructions')
         };
 
+        // initialize state
         this.state = {
             trackPlaying: false,
             trackLooped: false
         };
 
-
+        // keep track of stuff
         this.images = {};
         this.sounds = {};
-
         this.pads = {};
+        this.playlist = [];
+
+        // setup audioContext
+        this.audioCtx = new audioContext();
 
         // event listeners
-
         // handle clicks / touches
         document.addEventListener('click', ({ target }) => this.handleClick(target));
 
@@ -87,23 +94,19 @@ class SoundPad {
 
     load() {
 
-        // set colors, button text, and instructions
+        // set colors
         this.app.style.backgroundColor = this.config.colors.backgroundColor;
-
         this.nodes.loading.style.color = this.config.colors.textColor;
         this.nodes.name.textContent = this.config.settings.name;
         this.nodes.name.style.color = this.config.colors.textColor;
-
         this.nodes.menu.style.color = this.config.colors.textColor;
         this.nodes.menu.style.backgroundColor = this.config.colors.primaryColor;
-
         this.nodes.button.style.backgroundColor = this.config.colors.buttonColor;
-
+        this.nodes.control.style.color = this.config.colors.textColor;
+        // instructions
         this.nodes.instructions.innerHTML = this.isMobile ? 
         this.config.settings.instructionsMobile :
         this.config.settings.instructionsDesktop;
-
-        this.nodes.control.style.color = this.config.colors.textColor;
 
         // collect valid pads
         const pads = this.config['@@editor']
@@ -125,7 +128,7 @@ class SoundPad {
 
             // sound loader
             if (asset.type === 'sound') {
-                return loadSound(asset.key, asset.value)
+                return loadSoundBuffer(asset.key, asset.value, this.audioCtx)
             }
 
             return null;
@@ -136,15 +139,15 @@ class SoundPad {
         // load assets
         loadList([
             ...assets,
-            loadSound('backgroundTrack', this.config.sounds.backgroundTrack),
+            loadSoundBuffer('backgroundTrack', this.config.sounds.backgroundTrack, this.audioCtx),
             loadImage('backgroundImage', this.config.images.backgroundImage),
             loadFont('mainFont', this.config.settings.fontFamily)
         ])
         .then((loadedAssets) => {
 
             this.images = loadedAssets.image;
-            this.sounds = loadedAssets.sound;
             this.fonts = loadedAssets.font;
+            this.sounds = loadedAssets.sound;
 
             // attach onended handler for background track
             if (this.sounds.backgroundTrack) {
@@ -186,24 +189,21 @@ class SoundPad {
             let imageSrc = this.images[imageKey].src;
 
             // pad dom element
-            let containerNode = document.createElement('div');
             let padNode = document.createElement('div');
 
-            containerNode.id = id;
-            containerNode.className = 'pad-container';
-
             padNode.className = 'pad';
-            padNode.style.backgroundImage = `url("${imageSrc}")`;
+            // padNode.style.backgroundImage = `url("${imageSrc}")`;
             padNode.style.backgroundColor = this.config.colors.padColor;
             padNode.style.borderColor = this.config.colors.padSideColor;
 
-            containerNode.appendChild(padNode);
+            let image = this.images[imageKey];
+            image.id = id;
 
             return {
                 id: id,
                 sound: soundKey,
-                image: imageKey,
-                node: containerNode
+                image: this.images[imageKey],
+                node: padNode
             }
         })
         .reduce((pads, pad) => {
@@ -216,8 +216,6 @@ class SoundPad {
     }
 
     render() {
-        // reset pads
-        this.padLength = 0;
 
         // clear app
         let { pads } = this.nodes;
@@ -230,33 +228,19 @@ class SoundPad {
 
         Object.entries(this.pads)
         .map(ent => ent[1])
-        .forEach((pad, idx, arr) => {
+        .forEach((pad) => {
 
-            let padSize = this.getPadSize(arr.length);
-            let padNode = pad.node.firstChild;
+            // add image
+            pad.node.appendChild(pad.image);
 
-            padNode.style.width = `${padSize}px`;
-            padNode.style.height = `${padSize}px`;
-            padNode.sound = this.sounds[pad.sound];
             // attach sound node to pad node
             // needed for ios audio
+            pad.node.sound = this.sounds[pad.sound];
 
             board.appendChild(pad.node);
-
-            this.padLength += 1;
         })
 
         pads.appendChild(board);
-    }
-
-    getPadSize(total) {
-       let { bar } = this.nodes;
-       let padsHeight = this.appSize.height - bar.offsetHeight;
-       let padsWidth = this.appSize.width;
-
-       let padSize = padsWidth / (Math.sqrt(total) + 1);
-
-       return padSize;
     }
 
     handleClick(target) {
@@ -274,6 +258,20 @@ class SoundPad {
         if ( target.id === 'loop' ) {
             this.loopTrack();
         }
+
+        let pad = this.pads[target.id];
+        if (pad) {
+            this.playPadSound(pad.sound);
+        }
+
+        /*
+        console.log({
+            target,
+            audioCtx: this.audioCtx,
+            sounds: this.sounds,
+            pads: this.pads
+        });
+        */
     }
 
     playTrack() {
@@ -311,6 +309,39 @@ class SoundPad {
             this.state.trackLooping = true;
         }
 
+    }
+
+    playPadSound(key) {
+        // check if identical audioBuffer is playing
+        let playing = this.playlist.some(p => p.key === key);
+
+        // create audio buffer
+        let id = Math.random().toString(16).slice(2);
+        let audioBuffer = this.sounds[key];
+
+        let playback = audioPlay(audioBuffer, {
+            start: 0,
+            end: playing ? 0 : audioBuffer.duration,
+            context: this.audioCtx,
+            autoplay: false
+        }, () => {
+            // remove from list when done
+            this.playlist = this.playlist
+            .filter(p => !p.id === id);
+        })
+
+        // play audio
+        playback.play();
+
+        // add to playlist
+        this.playlist.push({
+            id: id,
+            key: key,
+            playback: playback,
+            timeStamp: Date.now()
+        });
+
+        console.log(this.playlist);
     }
 
     clearMenu() {

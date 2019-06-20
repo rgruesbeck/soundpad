@@ -54,6 +54,7 @@
  *   
  */
 
+const audioBufferLoader = require('audio-loader');
 const WebFont = require('webfontloader');
 
 const loadList = (list) => {
@@ -86,7 +87,7 @@ const loadImage = (key, url) => {
 
     // loaded
     image.onload = () => {
-      resolve({...result, ...{ value: image }});
+      resolve({ ...result, ...{ value: image }});
     };
 
     // error
@@ -120,6 +121,13 @@ const loadSound = (key, url) => {
   });
 }
 
+const loadSoundBuffer = (key, url) => {
+  return audioBufferLoader(url)
+  .then(buffer => {
+    return { type: 'sound', key: key, value: buffer };
+  })
+}
+
 const loadFont = (key, fontName) => {
   let result = { type: 'font', key: key, value: null };
 
@@ -139,4 +147,4 @@ const loadFont = (key, fontName) => {
   });
 }
 
-export { loadList, loadImage, loadSound, loadFont };
+export { loadList, loadImage, loadSound, loadSoundBuffer, loadFont };
