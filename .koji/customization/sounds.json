@@ -1,21 +1,17 @@
 {
-    "sounds": {
-      "backgroundTrack": "https://objects.koji-cdn.com/63bc2fb0-0c42-4acb-bee8-a060e9286a95/backgroundMusicSpace.mp3"
-    },
-    "@@editor": [
-      {
-        "key": "sounds",
-        "name": "Sounds",
-        "icon": "🔊️",
-        "source": "sounds.json",
-        "fields": [
-          {
-            "key": "backgroundTrack",
-            "name": "Background Track",
-            "description": "Background Track",
-            "type": "sound"
-          }
-        ]
-      }
-    ]
-  }
+  "sounds": {
+    "backgroundTrack": "https://objects.koji-cdn.com/5331a6ee-afb7-4598-a94a-87d568e6e3ed/TetrisSalsa.mp3"
+  },
+  "@@editor": [{
+    "key": "sounds",
+    "name": "Sounds",
+    "icon": "🔊️",
+    "source": "sounds.json",
+    "fields": [{
+      "key": "backgroundTrack",
+      "name": "Background Track",
+      "description": "Background Track",
+      "type": "sound"
+    }]
+  }]
+}
