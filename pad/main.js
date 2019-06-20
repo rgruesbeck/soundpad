@@ -179,20 +179,18 @@ class SoundPad {
         // create pads
         this.pads = Object.entries(sounds)
         .filter(ent => ent[0] != 'backgroundTrack') // ignore background track
-        .map((ent, idx, arr) => {
+        .map((ent) => {
             // pad id
             let id = Math.random().toString(16).slice(2);
 
             // pad sound and image key
             let soundKey = ent[0];
             let imageKey = soundKey.replace('Sound', 'Image');
-            let imageSrc = this.images[imageKey].src;
 
             // pad dom element
             let padNode = document.createElement('div');
 
             padNode.className = 'pad';
-            // padNode.style.backgroundImage = `url("${imageSrc}")`;
             padNode.style.backgroundColor = this.config.colors.padColor;
             padNode.style.borderColor = this.config.colors.padSideColor;
 
@@ -216,9 +214,9 @@ class SoundPad {
     }
 
     render() {
+        let { pads } = this.nodes;
 
         // clear app
-        let { pads } = this.nodes;
         while (pads.firstChild) {
             pads.removeChild(pads.firstChild);
         }
@@ -233,12 +231,16 @@ class SoundPad {
             // add image
             pad.node.appendChild(pad.image);
 
-            // attach sound node to pad node
             // needed for ios audio
+            // attach sound node to pad node
             pad.node.sound = this.sounds[pad.sound];
 
             board.appendChild(pad.node);
         })
+
+        // set pad style
+        let minSize = Math.max(75, Math.floor(Math.max(window.innerHeight / board.childElementCount, window.innerWidth / board.childElementCount)));
+        pads.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
 
         pads.appendChild(board);
     }
@@ -340,8 +342,6 @@ class SoundPad {
             playback: playback,
             timeStamp: Date.now()
         });
-
-        console.log(this.playlist);
     }
 
     clearMenu() {
