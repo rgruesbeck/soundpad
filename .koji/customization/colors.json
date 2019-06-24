@@ -15,9 +15,33 @@
       "source": "colors.json",
       "fields": [
         {
+          "key": "textColor",
+          "name": "Text Color",
+          "description": "Text Color",
+          "type": "color"
+        },
+        {
+          "key": "primaryColor",
+          "name": "Primary Color",
+          "description": "Primary Color",
+          "type": "color"
+        },
+        {
+          "key": "buttonColor",
+          "name": "Button Color",
+          "description": "Button Color",
+          "type": "color"
+        },
+        {
           "key": "padColor",
           "name": "Pad Color",
           "description": "Pad Color",
+          "type": "color"
+        },
+        {
+          "key": "padSideColor",
+          "name": "Pad Side Color",
+          "description": "Pad Side Color",
           "type": "color"
         },
         {

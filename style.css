@@ -77,6 +77,7 @@ body {
     border-right: 3px solid black;
 }
 
+/* fix for long images: http://zerosixthree.se/vertical-align-anything-with-just-3-lines-of-css/ */
 .pad > img {
     position: relative;
     top: 50%;

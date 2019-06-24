@@ -1,20 +1,30 @@
 {
     "settings": {
-      "name": "Sound Pad",
+      "name": "Sound Padzz",
       "instructionsMobile": "Tap a pad to trigger a sound",
       "instructionsDesktop": "Click a pad to trigger a sound",
-      "fontFamily": "Bungee Inline"
+      "fontFamily": "Bungee"
     },
     "@@editor": [
       {
         "key": "settings",
-        "name": "Pad settings",
+        "name": "Settings",
         "icon": "🎮",
         "source": "settings.json",
         "fields": [
           {
             "key": "name",
             "name": "App name",
+            "type": "text"
+          },
+          {
+            "key": "instructionsMobile",
+            "name": "Mobile Instructions",
+            "type": "text"
+          },
+          {
+            "key": "instructionsDesktop",
+            "name": "Desktop Instructions",
             "type": "text"
           },
           {

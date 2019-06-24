@@ -22,7 +22,8 @@ class SoundPad {
         this.nodes = {
             app: root,
             loading: document.getElementById('loading'),
-            name: document.getElementById('nameBanner'),
+            banner: document.getElementById('nameBanner'),
+            name: document.getElementById('name'),
             pads: document.getElementById('pads'),
             bar: document.getElementById('bar'),
             control: document.getElementById('control'),
@@ -95,15 +96,22 @@ class SoundPad {
     load() {
 
         // set colors
+        this.app.style.fontFamily = this.config.fontFamily;
         this.app.style.backgroundColor = this.config.colors.backgroundColor;
         this.nodes.loading.style.color = this.config.colors.textColor;
+
+        this.nodes.banner.textContent = this.config.settings.name;
+        this.nodes.banner.style.color = this.config.colors.textColor;
+
         this.nodes.name.textContent = this.config.settings.name;
         this.nodes.name.style.color = this.config.colors.textColor;
+
         this.nodes.menu.style.color = this.config.colors.textColor;
         this.nodes.menu.style.backgroundColor = this.config.colors.primaryColor;
         this.nodes.button.style.backgroundColor = this.config.colors.buttonColor;
         this.nodes.control.style.color = this.config.colors.textColor;
-        // instructions
+
+        // name and instructions
         this.nodes.instructions.innerHTML = this.isMobile ? 
         this.config.settings.instructionsMobile :
         this.config.settings.instructionsDesktop;
