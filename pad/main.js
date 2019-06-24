@@ -83,13 +83,6 @@ class SoundPad {
         // set mobile flag
         this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
-        // get app size
-        this.appSize = {
-            width: window.innerWidth,
-            height: this.isMobile ?
-            window.innerHeight - 250:
-            window.innerHeight
-        };
 
     }
 
@@ -229,6 +222,14 @@ class SoundPad {
             pads.removeChild(pads.firstChild);
         }
 
+        // get app size
+        this.appSize = {
+            width: window.innerWidth - 30,
+            height: this.isMobile ?
+            window.innerHeight - 250:
+            window.innerHeight
+        };
+
         // render new state
        let board = document.createDocumentFragment();
 
@@ -246,7 +247,8 @@ class SoundPad {
         })
 
         // set pad style
-        let minSize = Math.max(75, Math.floor(Math.max(window.innerHeight / board.childElementCount, window.innerWidth / board.childElementCount)));
+        let numPads = Object.entries(this.pads).length;
+        let minSize = this.getMaxSize(numPads);
         pads.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
 
         pads.appendChild(board);
@@ -268,19 +270,11 @@ class SoundPad {
             this.loopTrack();
         }
 
-        /*
-        let pad = this.pads[target.id];
-        if (pad) {
-            this.playPadSound(pad.sound);
-        }
+    }
 
-        console.log({
-            target,
-            audioCtx: this.audioCtx,
-            sounds: this.sounds,
-            pads: this.pads
-        });
-        */
+    getMaxSize(n) {
+        let maxBoxSize = Math.sqrt(this.appSize.width * this.appSize.height / n);
+        return this.appSize.width / Math.ceil(this.appSize.width / maxBoxSize);
     }
 
     playTrack() {
