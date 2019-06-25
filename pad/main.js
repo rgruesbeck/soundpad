@@ -225,9 +225,7 @@ class SoundPad {
         // get app size
         this.appSize = {
             width: window.innerWidth - 30,
-            height: this.isMobile ?
-            window.innerHeight - 250:
-            window.innerHeight
+            height: window.innerHeight - 250
         };
 
         // render new state
