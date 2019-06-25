@@ -233,6 +233,11 @@ class SoundPad {
         // render new state
        let board = document.createDocumentFragment();
 
+        // set pad style
+        let numPads = Object.entries(this.pads).length;
+        let minSize = this.getMaxSize(numPads);
+        pads.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
+
         Object.entries(this.pads)
         .map(ent => ent[1])
         .forEach((pad) => {
@@ -243,13 +248,12 @@ class SoundPad {
             // add image
             pad.node.appendChild(pad.image);
 
+            // set pad size
+            pad.node.style.height = `${minSize}px`;
+
             board.appendChild(pad.node);
         })
 
-        // set pad style
-        let numPads = Object.entries(this.pads).length;
-        let minSize = this.getMaxSize(numPads);
-        pads.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
 
         pads.appendChild(board);
     }
