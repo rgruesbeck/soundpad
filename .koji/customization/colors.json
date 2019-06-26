@@ -1,11 +1,12 @@
 {
   "colors": {
-    "textColor": "#aad2ff",
-    "primaryColor": "#424651",
-    "buttonColor": "#785ae6",
-    "padColor": "#785ae6",
-    "padSideColor": "#fa8cb4",
-    "backgroundColor": "#93A3BC"
+    "textColor": "#e0e0e0",
+    "primaryColor": "#28ed7a",
+    "buttonColor": "#d34618",
+    "loadingBarColor": "#d34618",
+    "padColor": "#f9b10d",
+    "padSideColor": "#f07100",
+    "backgroundColor": "#292929"
   },
   "@@editor": [
     {
@@ -29,7 +30,13 @@
         {
           "key": "buttonColor",
           "name": "Button Color",
-          "description": "Button Color",
+          "description": "Start Button Color",
+          "type": "color"
+        },
+        {
+          "key": "loadingBarColor",
+          "name": "Loading Bar Color",
+          "description": "Loading Bar Color",
           "type": "color"
         },
         {

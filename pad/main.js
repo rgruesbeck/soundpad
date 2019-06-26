@@ -97,8 +97,10 @@ class SoundPad {
         // set colors
         this.app.style.fontFamily = this.config.fontFamily;
         this.app.style.backgroundColor = this.config.colors.backgroundColor;
+        document.body.style.backgroundColor = this.config.colors.backgroundColor;
+
         this.nodes.loading.style.color = this.config.colors.textColor;
-        this.nodes.loadingbar.style.backgroundColor = this.config.colors.primaryColor;
+        this.nodes.loadingbar.style.backgroundColor = this.config.colors.loadingBarColor;
 
         this.nodes.banner.textContent = this.config.settings.name;
         this.nodes.banner.style.color = this.config.colors.textColor;
@@ -107,7 +109,7 @@ class SoundPad {
         this.nodes.name.style.color = this.config.colors.textColor;
 
         this.nodes.menu.style.color = this.config.colors.textColor;
-        this.nodes.menu.style.backgroundColor = this.config.colors.primaryColor;
+        this.nodes.menu.style.backgroundColor = this.config.colors.backgroundColor;
         this.nodes.button.style.backgroundColor = this.config.colors.buttonColor;
         this.nodes.control.style.color = this.config.colors.textColor;
 
@@ -153,12 +155,7 @@ class SoundPad {
             ], (progress) => {
                 // update progress
                 this.nodes.loadingbar.style.width = `${progress.percent}%`;
-                this.nodes.loadingbar.textContent = `loading ${progress.percent}%`;
-
-                // print loading stats
-                this.nodes.loadingstats.textContent = progress.loaded ?
-                    `${progress.loaded.type} ${progress.loaded.key}` :
-                    ``;
+                this.nodes.loadingbar.innerHTML = `<span style="">${progress.percent}%</span>`;
             })
             .then((loadedAssets) => {
 
