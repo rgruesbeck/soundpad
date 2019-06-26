@@ -54,10 +54,23 @@
  *   
  */
 
-const audioBufferLoader = require('audio-loader');
-const WebFont = require('webfontloader');
+import audioBufferLoader from 'audio-loader';
+import WebFont from 'webfontloader';
 
-const loadList = (list) => {
+const loadList = (list, progress) => {
+  // calculate loading progress
+  let i = 0;
+  progress({ percent: 0, loaded: null });
+  for (const prm of list) {
+    prm.then((asset) => {
+      i ++;
+      progress({
+        percent: Math.floor(i * 100 / list.length),
+        loaded: { type: asset.type, key: asset.key }
+      })
+    });
+  }
+
   return Promise.all(list)
   .then((assets) => {
     return assets.reduce((collection, asset) => {
@@ -105,27 +118,14 @@ const loadSound = (key, url) => {
   if (!key || !url) { return result; }
 
   return new Promise((resolve, reject) => {
-    let sound = new Audio(url);
-
-    // loaded
-    sound.oncanplaythrough = () => {
+    audioBufferLoader(url)
+    .then((sound) => {
       resolve({...result, ...{ value: sound }});
-    };
-
-    // error
-    sound.onerror = () => {
-      reject(result);
-    };
-
-    sound.load(); // for iphones
+    })
+    .catch((err) => {
+      reject(err);
+    })
   });
-}
-
-const loadSoundBuffer = (key, url) => {
-  return audioBufferLoader(url)
-  .then(buffer => {
-    return { type: 'sound', key: key, value: buffer };
-  })
 }
 
 const loadFont = (key, fontName) => {
@@ -134,7 +134,7 @@ const loadFont = (key, fontName) => {
   // check
   if (!key || !fontName) { return result; }
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const font = {
       google: {
         families: [fontName]
@@ -147,4 +147,4 @@ const loadFont = (key, fontName) => {
   });
 }
 
-export { loadList, loadImage, loadSound, loadSoundBuffer, loadFont };
+export { loadList, loadImage, loadSound, loadFont };

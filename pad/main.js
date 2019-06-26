@@ -3,7 +3,7 @@
 import Koji from 'koji-tools';
 
 import audioPlay from 'audio-play';
-import { audioContext } from './audioContext.js';
+import audioContext from 'audio-context';
 
 import {
     loadList,
@@ -22,6 +22,8 @@ class SoundPad {
         this.nodes = {
             app: root,
             loading: document.getElementById('loading'),
+            loadingbar: document.getElementById('loadingbar'),
+            loadingstats: document.getElementById('loadingstats'),
             banner: document.getElementById('nameBanner'),
             name: document.getElementById('name'),
             pads: document.getElementById('pads'),
@@ -48,25 +50,22 @@ class SoundPad {
         this.playlist = [];
 
         // setup audioContext
-        this.audioCtx = new audioContext();
+        this.audioCtx = audioContext();
 
-        // event listeners
-        // handle clicks / touches
-        document.addEventListener('click', ({ target }) => this.handleClick(target));
+        // device sniffing
+        this.device = {
+            isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent),
+            iOS: /iPhone|iPad|iPod/i.test(navigator.userAgent)
+        };
 
-        // hacky way to play sounds, needed for ios
-        document.addEventListener('touchstart', ({ target }) => {
-            if (target.sound) {
-                target.sound.currentTime = 0;
-                target.sound.play();
-            }
-        })
-        document.addEventListener('mousedown', ({ target }) => {
-            if (target.sound) {
-                target.sound.currentTime = 0;
-                target.sound.play();
-            }
-        })
+        /* event listeners */
+
+        // input
+        if (this.device.isMobile) {
+            document.addEventListener('touchstart', ({ target }) => this.handleTap(target));
+        } else {
+            document.addEventListener('click', ({ target }) => this.handleTap(target));
+        }
 
         // orientation change
         window.addEventListener("orientationchange", () => this.render());
@@ -76,14 +75,21 @@ class SoundPad {
 
         // handle koji config changes
         Koji.on('change', (scope, key, value) => {
-           this.config[scope][key] = value;
-           this.load();
+            this.config[scope][key] = value;
+            this.load();
         });
 
-        // set mobile flag
-        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry/i.test(navigator.userAgent);
 
-
+        // warm up audio context for iOS devices
+        if (this.device.iOS && this.audioCtx.state === 'suspended') {
+            // check for locked audio context on touchend
+            // NOTE: NOT using touchstart to avoid getting relocked incase gesture is detected.
+            document.addEventListener('touchend', () => {
+                if (this.audioCtx.state !== 'running') {
+                    this.audioCtx.resume();
+                }
+            })
+        }
     }
 
     load() {
@@ -92,6 +98,7 @@ class SoundPad {
         this.app.style.fontFamily = this.config.fontFamily;
         this.app.style.backgroundColor = this.config.colors.backgroundColor;
         this.nodes.loading.style.color = this.config.colors.textColor;
+        this.nodes.loadingbar.style.backgroundColor = this.config.colors.primaryColor;
 
         this.nodes.banner.textContent = this.config.settings.name;
         this.nodes.banner.style.color = this.config.colors.textColor;
@@ -105,66 +112,78 @@ class SoundPad {
         this.nodes.control.style.color = this.config.colors.textColor;
 
         // name and instructions
-        this.nodes.instructions.innerHTML = this.isMobile ? 
-        this.config.settings.instructionsMobile :
-        this.config.settings.instructionsDesktop;
+        this.nodes.instructions.innerHTML = this.device.isMobile ?
+            this.config.settings.instructionsMobile :
+            this.config.settings.instructionsDesktop;
 
         // collect valid pads
         const pads = this.config['@@editor']
-        .find(scope => scope.key === 'pads').fields // get pad assets listed in the editor
-        .filter(padAsset => padAsset.type) // ignore un-typed items
-        .filter(padAsset => this.config.pads[padAsset.key]) // ignore un-keyed items
-        .map(padAsset => {
-            padAsset.value = this.config.pads[padAsset.key]; // attach value
-            return padAsset;
-        });
+            .find(scope => scope.key === 'pads').fields // get pad assets listed in the editor
+            .filter(padAsset => padAsset.type) // ignore un-typed items
+            .filter(padAsset => this.config.pads[padAsset.key]) // ignore un-keyed items
+            .map(padAsset => {
+                padAsset.value = this.config.pads[padAsset.key]; // attach value
+                return padAsset;
+            });
 
         // setup asset loaders
         const assets = pads
-        .map(asset => {
-            // image loader
-            if (asset.type === 'image') {
-                return loadImage(asset.key, asset.value)
-            }
+            .map(asset => {
+                // image loader
+                if (asset.type === 'image') {
+                    return loadImage(asset.key, asset.value)
+                }
 
-            // sound loader
-            if (asset.type === 'sound') {
-                return loadSound(asset.key, asset.value)
-            }
+                // sound loader
+                if (asset.type === 'sound') {
+                    return loadSound(asset.key, asset.value)
+                }
 
-            return null;
-        }).filter(asset => asset);
+                return null;
+            }).filter(asset => asset);
 
 
 
         // load assets
         loadList([
-            ...assets,
-            loadSound('backgroundTrack', this.config.sounds.backgroundTrack),
-            loadImage('backgroundImage', this.config.images.backgroundImage),
-            loadFont('mainFont', this.config.settings.fontFamily)
-        ])
-        .then((loadedAssets) => {
+                ...assets,
+                loadSound('backgroundTrack', this.config.sounds.backgroundTrack),
+                loadImage('backgroundImage', this.config.images.backgroundImage),
+                loadFont('mainFont', this.config.settings.fontFamily)
+            ], (progress) => {
+                // update progress
+                this.nodes.loadingbar.style.width = `${progress.percent}%`;
+                this.nodes.loadingbar.textContent = `loading ${progress.percent}%`;
 
-            this.images = loadedAssets.image;
-            this.fonts = loadedAssets.font;
-            this.sounds = loadedAssets.sound;
+                // print loading stats
+                this.nodes.loadingstats.textContent = progress.loaded ?
+                    `${progress.loaded.type} ${progress.loaded.key}` :
+                    ``;
+            })
+            .then((loadedAssets) => {
 
-            // attach onended handler for background track
-            if (this.sounds.backgroundTrack) {
-                this.sounds.backgroundTrack.onended = () => {
-                    if (!this.state.trackLooped) {
-                        this.nodes.playControl.textContent = 'play_arrow';
-                    }
-                };
-            }
+                this.images = loadedAssets.image;
+                this.fonts = loadedAssets.font;
+                this.sounds = loadedAssets.sound;
 
-            if (this.images.backgroundImage) {
-                this.app.style.backgroundImage = `url('${this.images.backgroundImage.src}')`;
-            }
+                // attach onended handler for background track
+                if (this.sounds.backgroundTrack) {
+                    this.sounds.backgroundTrack.onended = () => {
+                        if (!this.state.trackLooped) {
+                            this.nodes.playControl.textContent = 'play_arrow';
+                        }
+                    };
+                }
 
-            this.create(this.sounds);
-        })
+                if (this.images.backgroundImage) {
+                    this.app.style.backgroundImage = `url('${this.images.backgroundImage.src}')`;
+                }
+
+                this.create(this.sounds);
+            })
+            .catch((err) => {
+                console.error('loading failed', err);
+            })
 
     }
 
@@ -172,50 +191,55 @@ class SoundPad {
         // set menu font
         this.app.style.fontFamily = this.fonts.mainFont;
 
-        let { app, loading } = this.nodes;
+        let {
+            app,
+            loading
+        } = this.nodes;
         // hide loading & show app
-        loading.style.opacity = 0;
+        loading.style.display = 'none';
         app.style.opacity = 1;
 
         // create pads
         this.pads = Object.entries(sounds)
-        .filter(ent => ent[0] != 'backgroundTrack') // ignore background track
-        .map((ent) => {
-            // pad id
-            let id = Math.random().toString(16).slice(2);
+            .filter(ent => ent[0] != 'backgroundTrack') // ignore background track
+            .map((ent) => {
+                // pad id
+                let id = Math.random().toString(16).slice(2);
 
-            // pad sound and image key
-            let soundKey = ent[0];
-            let imageKey = soundKey.replace('Sound', 'Image');
+                // pad sound and image key
+                let soundKey = ent[0];
+                let imageKey = soundKey.replace('Sound', 'Image');
 
-            // pad dom element
-            let padNode = document.createElement('div');
+                // pad dom element
+                let padNode = document.createElement('div');
 
-            padNode.className = 'pad';
-            padNode.style.backgroundColor = this.config.colors.padColor;
-            padNode.style.borderColor = this.config.colors.padSideColor;
+                padNode.className = 'pad';
+                padNode.style.backgroundColor = this.config.colors.padColor;
+                padNode.style.borderColor = this.config.colors.padSideColor;
 
-            let image = this.images[imageKey];
-            image.id = id;
+                let image = this.images[imageKey];
+                image.id = soundKey;
 
-            return {
-                id: id,
-                sound: soundKey,
-                image: this.images[imageKey],
-                node: padNode
-            }
-        })
-        .reduce((pads, pad) => {
-            pads[pad.id] = pad;
-            return pads;
-        }, {});
+                return {
+                    id: id,
+                    sound: soundKey,
+                    image: this.images[imageKey],
+                    node: padNode
+                }
+            })
+            .reduce((pads, pad) => {
+                pads[pad.id] = pad;
+                return pads;
+            }, {});
 
         // render sound board
         this.render();
     }
 
     render() {
-        let { pads } = this.nodes;
+        let {
+            pads
+        } = this.nodes;
 
         // clear app
         while (pads.firstChild) {
@@ -229,47 +253,50 @@ class SoundPad {
         };
 
         // render new state
-       let board = document.createDocumentFragment();
+        let board = document.createDocumentFragment();
 
         // set pad style
         let numPads = Object.entries(this.pads).length;
-        let minSize = this.getMaxSize(numPads);
+        let minSize = Math.max(75, this.getMaxSize(numPads));
         pads.style.gridTemplateColumns = `repeat(auto-fit, minmax(${minSize}px, 1fr))`;
 
         Object.entries(this.pads)
-        .map(ent => ent[1])
-        .forEach((pad) => {
-            // needed for ios audio
-            // attach sound node to pad node
-            pad.image.sound = this.sounds[pad.sound];
+            .map(ent => ent[1])
+            .forEach((pad) => {
+                // add image
+                pad.node.appendChild(pad.image);
 
-            // add image
-            pad.node.appendChild(pad.image);
+                // set pad size
+                pad.node.style.height = `${minSize}px`;
+                pad.node.style.width = `${minSize}px`;
 
-            // set pad size
-            pad.node.style.height = `${minSize}px`;
-
-            board.appendChild(pad.node);
-        })
+                board.appendChild(pad.node);
+            })
 
 
         pads.appendChild(board);
     }
 
-    handleClick(target) {
+    handleTap(target) {
         // start
         if (target.id === 'button') {
             this.clearMenu();
         }
 
         // play/pause background track
-        if ( target.id === 'play' ) {
+        if (target.id === 'play') {
             this.playTrack();
         }
 
         // toggle loop: background track
-        if ( target.id === 'loop' ) {
+        if (target.id === 'loop') {
             this.loopTrack();
+        }
+
+        // play a sound
+        let sound = this.sounds[target.id];
+        if (sound) {
+            this.playSound(target.id, sound);
         }
 
     }
@@ -280,76 +307,100 @@ class SoundPad {
     }
 
     playTrack() {
+        let {
+            playControl
+        } = this.nodes;
 
-        let { backgroundTrack } = this.sounds;
-        let { playControl } = this.nodes;
+        // play background track
+        if (!this.backgroundTrack) {
+            let backgroundTrackBuffer = this.sounds['backgroundTrack'];
+            this.backgroundTrack = audioPlay(backgroundTrackBuffer, {
+                start: 0,
+                end: backgroundTrackBuffer.duration,
+                context: this.audioCtx
+            }, () => {
+                // clear backgroundTrack
+                this.backgroundTrack = null;
+                playControl.textContent = 'play_arrow';
+                this.state.trackPlaying = false;
 
+                // play again if loop
+                if (this.state.trackLooping) {
+                    this.playTrack();
+                }
+            });
+        }
+
+
+        // update play controls
         if (this.state.trackPlaying) {
-            backgroundTrack.pause();
             playControl.textContent = 'play_arrow';
-
             this.state.trackPlaying = false;
+            this.backgroundTrack.pause();
+            this.backgroundTrack = null;
         } else {
-            backgroundTrack.play();
             playControl.textContent = 'pause';
-
             this.state.trackPlaying = true;
         }
 
     }
 
     loopTrack() {
-        let { backgroundTrack } = this.sounds;
-        let { loopControl } = this.nodes;
+        let {
+            loopControl
+        } = this.nodes;
 
         if (this.state.trackLooping) {
-            backgroundTrack.loop = false;
             loopControl.textContent = 'repeat_one';
-
             this.state.trackLooping = false;
         } else {
-            backgroundTrack.loop = true;
             loopControl.textContent = 'repeat';
-
             this.state.trackLooping = true;
         }
-
     }
 
-    playPadSound(key) {
-        // check if identical audioBuffer is playing
-        let playing = this.playlist.some(p => p.key === key);
+    playSound(key, audioBuffer) {
+        if (!key || !audioBuffer) {
+            return;
+        }
 
-        // create audio buffer
+        // add audio buffer to the play list
         let id = Math.random().toString(16).slice(2);
-        let audioBuffer = this.sounds[key];
-        let end = playing ? 0 : audioBuffer.duration;
-
-        let playback = audioPlay(audioBuffer, {
-            start: 0,
-            end: end,
-            context: this.audioCtx,
-            autoplay: false
-        }, () => {
-            // remove from list when done
-            this.playlist = this.playlist
-            .filter(p => !p.id === id);
-        })
-
-        // play audio
-        playback.play();
-
-        // add to playlist
-        this.playlist.push({
+        let sound = {
             id: id,
             key: key,
-            playback: playback,
-            timeStamp: Date.now()
-        });
+            active: true,
+            playback: audioPlay(audioBuffer, {
+                start: 0,
+                end: audioBuffer.duration,
+                loop: false,
+                context: this.audioCtx
+            }, () => {
+                // remove played sounds from playlist
+                this.playlist = this.playlist
+                    .filter(s => s.id != id);
+            })
+        }
+
+        // stop and remove identical sounds from the playlist
+        this.playlist = [
+            ...this.playlist
+            .filter(s => {
+                let sameBuffer = s.key === key;
+                if (sameBuffer) {
+                    s.playback.pause();
+                }
+                return sameBuffer;
+            }),
+            sound
+        ]
     }
 
     clearMenu() {
-        let { overlay, menu } = this.nodes;
+        let {
+            overlay,
+            menu
+        } = this.nodes;
 
         // fade menu out
         menu.style.opacity = 0;
