@@ -10,7 +10,7 @@ import {
     loadImage,
     loadSound,
     loadFont
-} from './assetLoaders.js';
+} from 'game-asset-loader';
 
 class SoundPad {
     constructor(root, config) {
@@ -22,8 +22,6 @@ class SoundPad {
         this.nodes = {
             app: root,
             loading: document.getElementById('loading'),
-            loadingbar: document.getElementById('loadingbar'),
-            loadingstats: document.getElementById('loadingstats'),
             banner: document.getElementById('nameBanner'),
             name: document.getElementById('name'),
             pads: document.getElementById('pads'),
@@ -100,7 +98,6 @@ class SoundPad {
         document.body.style.backgroundColor = this.config.colors.backgroundColor;
 
         this.nodes.loading.style.color = this.config.colors.textColor;
-        this.nodes.loadingbar.style.backgroundColor = this.config.colors.loadingBarColor;
 
         this.nodes.banner.textContent = this.config.settings.name;
         this.nodes.banner.style.color = this.config.colors.textColor;
@@ -154,8 +151,7 @@ class SoundPad {
                 loadFont('mainFont', this.config.settings.fontFamily)
             ], (progress) => {
                 // update progress
-                this.nodes.loadingbar.style.width = `${progress.percent}%`;
-                this.nodes.loadingbar.innerHTML = `<span style="">${progress.percent}%</span>`;
+                document.querySelector('#loading-progress').textContent = `${progress.percent}%`
             })
             .then((loadedAssets) => {
 
@@ -190,10 +186,13 @@ class SoundPad {
 
         let {
             app,
+            menu,
             loading
         } = this.nodes;
+
         // hide loading & show app
         loading.style.display = 'none';
+        menu.style.opacity = 1;
         app.style.opacity = 1;
 
         // create pads
@@ -275,7 +274,8 @@ class SoundPad {
     }
 
     handleTap(target) {
-        // start
+        console.log('tap', target)
+            // start
         if (target.id === 'button') {
             this.clearMenu();
         }
@@ -394,6 +394,7 @@ class SoundPad {
     }
 
     clearMenu() {
+        console.log('clear')
         let {
             overlay,
             menu
