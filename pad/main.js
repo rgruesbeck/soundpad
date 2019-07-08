@@ -4,6 +4,7 @@ import Koji from 'koji-tools';
 
 import audioPlay from 'audio-play';
 import audioContext from 'audio-context';
+import unlockAudioContext from 'unlock-audio-context';
 
 import {
     loadList,
@@ -78,16 +79,8 @@ class SoundPad {
         });
 
 
-        // warm up audio context for iOS devices
-        if (this.device.iOS && this.audioCtx.state === 'suspended') {
-            // check for locked audio context on touchend
-            // NOTE: NOT using touchstart to avoid getting relocked incase gesture is detected.
-            document.addEventListener('touchend', () => {
-                if (this.audioCtx.state !== 'running') {
-                    this.audioCtx.resume();
-                }
-            })
-        }
+        // warm up audio context for Mobile/iOS devices
+        unlockAudioContext(this.audioCtx);
     }
 
     load() {
@@ -274,7 +267,6 @@ class SoundPad {
     }
 
     handleTap(target) {
-        console.log('tap', target)
             // start
         if (target.id === 'button') {
             this.clearMenu();
@@ -394,7 +386,6 @@ class SoundPad {
     }
 
     clearMenu() {
-        console.log('clear')
         let {
             overlay,
             menu
