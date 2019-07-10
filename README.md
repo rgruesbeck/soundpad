@@ -24,10 +24,6 @@ This is the main directory
 This directory contains the main pad code.
 - [pad/main.js](#~/pad/main.js) is the main code for the sound pad.
 
-### ~/pad/helpers
-This directory contains helper code for loading assets.
-- [assetLoaders: pad/helpers/assetLoaders.js](#~/pad/helpers/assetLoaders.js) a collections of functions to help load image, sound, and font assets.
-
 ## Support
 ### Community
 If you need any help, you can ask the community by [making a post](https://gokoji.com/posts), or [joining the discord](https://discordapp.com/invite/eQuMJF6).
