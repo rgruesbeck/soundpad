@@ -103,6 +103,9 @@ class SoundPad {
         this.nodes.button.style.backgroundColor = this.config.colors.buttonColor;
         this.nodes.control.style.color = this.config.colors.textColor;
 
+        // button text
+        this.nodes.button.textContent = this.config.settings.startText;
+
         // name and instructions
         this.nodes.instructions.innerHTML = this.device.isMobile ?
             this.config.settings.instructionsMobile :
